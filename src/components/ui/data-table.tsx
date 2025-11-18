@@ -31,8 +31,10 @@ import { Button } from "./button"
 import { Input } from "./input"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "./dropdown-menu"
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react"
@@ -54,9 +56,11 @@ interface DataTableProps<TData, TValue> {
     options: { label: string; value: string }[]
   }[]
   onAdd?: () => void
+  onImport?: () => void
   onEdit?: (row: TData) => void
   onDelete?: (row: TData) => void
   addButtonLabel?: string
+  importButtonLabel?: string
   showPagination?: boolean
   searchPlaceholder?: string
   pageSizeOptions?: number[]
@@ -68,9 +72,11 @@ export function DataTable<TData, TValue>({
   searchKey,
   filterOptions = [],
   onAdd,
+  onImport,
   onEdit,
   onDelete,
   addButtonLabel = "Add New",
+  importButtonLabel = "Import from Excel",
   showPagination = true,
   searchPlaceholder,
   pageSizeOptions = [5, 10, 20, 50],
@@ -197,27 +203,59 @@ export function DataTable<TData, TValue>({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                {filter.options.map((option) => (
-                  <DropdownMenuCheckboxItem
-                    key={option.value}
-                    className="capitalize"
-                    checked={table.getColumn(filter.columnId)?.getFilterValue() === option.value}
-                    onCheckedChange={(checked) =>
-                      table.getColumn(filter.columnId)?.setFilterValue(checked ? option.value : "")
-                    }
-                  >
-                    {option.label}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ))}
-        </div>
-        
+          <DropdownMenuRadioGroup
+            value={
+              (table.getColumn(filter.columnId)?.getFilterValue() as string | undefined) ??
+              "all"
+            }
+            onValueChange={(value) =>
+              table
+                .getColumn(filter.columnId)
+                ?.setFilterValue(value === "all" ? undefined : value)
+            }
+          >
+            {filter.options.map((option) => (
+              <DropdownMenuRadioItem
+                key={option.value}
+                value={option.value}
+                className="capitalize"
+              >
+                {option.label}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ))}
+  </div>
+
         {onAdd && (
-          <Button onClick={onAdd}>
-            <span className="mr-2">+</span> {addButtonLabel}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <span className="mr-2">+</span> {addButtonLabel}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.preventDefault()
+                  onAdd()
+                }}
+              >
+                Create manually
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                disabled={!onImport}
+                onClick={(event) => {
+                  event.preventDefault()
+                  onImport?.()
+                }}
+              >
+                {importButtonLabel}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
       
