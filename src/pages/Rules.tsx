@@ -20,6 +20,7 @@ import {
   Server,
   Radar,
   Activity,
+  Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -153,6 +154,45 @@ const Rules = () => {
       sid: '2000003',
       name: 'ET MALWARE Suspicious Executable Download',
       category: 'malware',
+      severity: 'critical',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 65,
+      lastTriggered: '2025-02-16T16:45:00Z',
+      description: 'Detects suspicious executable downloads from untrusted hosts.'
+    },
+    {
+      id: '4',
+      sid: '2000004',
+      name: 'ET POLICY Outbound TLS Without SNI',
+      category: 'policy-violation',
+      severity: 'medium',
+      action: 'alert',
+      status: 'enabled',
+      triggeredCount: 12,
+      lastTriggered: '2025-02-16T11:05:00Z',
+      description: 'Monitors TLS sessions that omit SNI, a common evasion tactic.'
+    },
+    {
+      id: '5',
+      sid: '2000005',
+      name: 'ET WEB SQL Injection Attempt',
+      category: 'web-application-attack',
+      severity: 'high',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 33,
+      lastTriggered: '2025-02-13T18:15:00Z',
+      description: 'Blocks common SQL injection payloads targeting customer portals.'
+    },
+    {
+      id: '6',
+      sid: '2000006',
+      name: 'ET DOS Slowloris Keep-Alive Flood',
+      category: 'denial-of-service',
+      severity: 'critical',
+      action: 'drop',
+      status: 'enabled',
       severity: 'critical',
       action: 'drop',
       status: 'enabled',
@@ -416,6 +456,16 @@ const Rules = () => {
       if (Date.now() - lastSeen > 72 * 60 * 60 * 1000) return false;
     }
     return true;
+  });
+
+  const [formData, setFormData] = useState<Partial<Rule>>({
+    sid: '',
+    name: '',
+    category: '',
+    severity: 'medium',
+    action: 'alert',
+    status: 'enabled',
+    description: ''
   });
 
   const [formData, setFormData] = useState<Partial<Rule>>(defaultRuleForm);
@@ -898,6 +948,51 @@ const Rules = () => {
         </Card>
       </div>
 
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add new rule
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Active rules</p>
+              <p className="text-3xl font-semibold">{activeRules}</p>
+            </div>
+            <Shield className="h-10 w-10 text-emerald-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Disabled / staged</p>
+              <p className="text-3xl font-semibold">{disabledRules}</p>
+            </div>
+            <Layers className="h-10 w-10 text-amber-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Critical coverage</p>
+              <p className="text-3xl font-semibold">{criticalRules}</p>
+            </div>
+            <AlertTriangle className="h-10 w-10 text-red-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Triggered (72h)</p>
+              <p className="text-3xl font-semibold">{recentlyTriggered}</p>
+            </div>
+            <Clock className="h-10 w-10 text-sky-500" />
+          </CardContent>
+        </Card>
+      </div>
+
       <Card className="border-border bg-gradient-card">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -995,6 +1090,8 @@ const Rules = () => {
             onImport={() => openImportModal('rules')}
             addButtonLabel="Create rule"
             importButtonLabel="Import Excel"
+            onAdd={() => setIsModalOpen(true)}
+            addButtonLabel="Add Rule"
             searchPlaceholder="Search rules by name, SID, or category..."
             pageSizeOptions={[5, 10, 20, 50]}
           />
