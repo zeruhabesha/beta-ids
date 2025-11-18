@@ -1,15 +1,20 @@
 import { useState } from "react";
-import { 
-  Target, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save, 
-  X, 
+import {
+  Target,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  X,
   AlertCircle,
   AlertTriangle,
   Bell,
-  Check
+  Check,
+  Filter,
+  Shield,
+  Layers,
+  BarChart3,
+  Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -64,37 +69,145 @@ const Rules = () => {
       id: '1',
       sid: '2000001',
       name: 'ET EXPLOIT SSH Weak Encryption Algorithms',
-      category: 'Exploit',
+      category: 'exploit',
       severity: 'high',
       action: 'alert',
       status: 'enabled',
       triggeredCount: 42,
-      lastTriggered: '2023-10-15T14:30:00Z',
-      description: 'This rule detects SSH connections using weak encryption algorithms.'
+      lastTriggered: '2025-02-15T14:30:00Z',
+      description: 'Detects SSH connections using deprecated or weak encryption algorithms.'
     },
     {
       id: '2',
       sid: '2000002',
       name: 'ET SCAN Nmap Scripting Engine',
-      category: 'Scan',
+      category: 'network-scan',
       severity: 'medium',
       action: 'alert',
       status: 'enabled',
       triggeredCount: 18,
-      lastTriggered: '2023-10-14T09:15:00Z',
-      description: 'Detects Nmap Scripting Engine activity.'
+      lastTriggered: '2025-02-14T09:15:00Z',
+      description: 'Detects Nmap Scripting Engine activity on sensitive segments.'
     },
     {
       id: '3',
       sid: '2000003',
       name: 'ET MALWARE Suspicious Executable Download',
-      category: 'Malware',
+      category: 'malware',
       severity: 'critical',
       action: 'drop',
       status: 'enabled',
-      triggeredCount: 5,
-      lastTriggered: '2023-10-16T16:45:00Z',
-      description: 'Detects suspicious executable downloads.'
+      triggeredCount: 65,
+      lastTriggered: '2025-02-16T16:45:00Z',
+      description: 'Detects suspicious executable downloads from untrusted hosts.'
+    },
+    {
+      id: '4',
+      sid: '2000004',
+      name: 'ET POLICY Outbound TLS Without SNI',
+      category: 'policy-violation',
+      severity: 'medium',
+      action: 'alert',
+      status: 'enabled',
+      triggeredCount: 12,
+      lastTriggered: '2025-02-16T11:05:00Z',
+      description: 'Monitors TLS sessions that omit SNI, a common evasion tactic.'
+    },
+    {
+      id: '5',
+      sid: '2000005',
+      name: 'ET WEB SQL Injection Attempt',
+      category: 'web-application-attack',
+      severity: 'high',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 33,
+      lastTriggered: '2025-02-13T18:15:00Z',
+      description: 'Blocks common SQL injection payloads targeting customer portals.'
+    },
+    {
+      id: '6',
+      sid: '2000006',
+      name: 'ET DOS Slowloris Keep-Alive Flood',
+      category: 'denial-of-service',
+      severity: 'critical',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 4,
+      lastTriggered: '2025-02-16T05:30:00Z',
+      description: 'Drops Slowloris-style keep-alive floods before saturation.'
+    },
+    {
+      id: '7',
+      sid: '2000007',
+      name: 'ET POLICY P2P Bittorrent Activity',
+      category: 'policy-violation',
+      severity: 'low',
+      action: 'alert',
+      status: 'disabled',
+      triggeredCount: 0,
+      lastTriggered: '2025-01-25T08:45:00Z',
+      description: 'Alert only rule for unauthorized P2P activity.'
+    },
+    {
+      id: '8',
+      sid: '2000008',
+      name: 'ET TROJAN Possible Emotet Callback',
+      category: 'trojan-activity',
+      severity: 'critical',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 25,
+      lastTriggered: '2025-02-12T22:00:00Z',
+      description: 'Signature looking for known Emotet C2 infrastructure.'
+    },
+    {
+      id: '9',
+      sid: '2000009',
+      name: 'ET ATTACKKIT Metasploit Meterpreter Stage',
+      category: 'attempted-admin',
+      severity: 'high',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 17,
+      lastTriggered: '2025-02-11T03:10:00Z',
+      description: 'Detects meterpreter staging traffic.'
+    },
+    {
+      id: '10',
+      sid: '2000010',
+      name: 'ET CNC ShadowPad Beacon',
+      category: 'trojan-activity',
+      severity: 'critical',
+      action: 'drop',
+      status: 'enabled',
+      triggeredCount: 7,
+      lastTriggered: '2025-02-10T10:00:00Z',
+      description: 'Looks for ShadowPad C2 beacons leveraging TLS JA3 fingerprints.'
+    },
+    {
+      id: '11',
+      sid: '2000011',
+      name: 'ET INFO TLS Certificate Expired',
+      category: 'policy-violation',
+      severity: 'low',
+      action: 'alert',
+      status: 'enabled',
+      triggeredCount: 53,
+      lastTriggered: '2025-02-16T07:42:00Z',
+      description: 'Alerts on expired certificates observed on outbound TLS.'
+    },
+    {
+      id: '12',
+      sid: '2000012',
+      name: 'ET SCAN Masscan Detected',
+      category: 'network-scan',
+      severity: 'medium',
+      action: 'alert',
+      status: 'enabled',
+      triggeredCount: 88,
+      lastTriggered: '2025-02-16T15:20:00Z',
+      description: 'Detects the very fast masscan scanner hitting perimeter services.'
     }
   ]);
 
@@ -103,6 +216,11 @@ const Rules = () => {
   const [editingRule, setEditingRule] = useState<Rule | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [ruleToDelete, setRuleToDelete] = useState<Rule | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'enabled' | 'disabled'>('all');
+  const [severityFilter, setSeverityFilter] = useState<'all' | Rule['severity']>('all');
+  const [actionFilter, setActionFilter] = useState<'all' | Rule['action']>('all');
+  const [categoryFilter, setCategoryFilter] = useState<'all' | string>('all');
+  const [recentOnly, setRecentOnly] = useState(false);
 
   // Form state
   const categories = [
@@ -124,6 +242,54 @@ const Rules = () => {
     'unusual-client-port-connection',
     'web-application-activity'
   ];
+
+  const activeRules = rules.filter(rule => rule.status === 'enabled').length;
+  const disabledRules = rules.filter(rule => rule.status === 'disabled').length;
+  const criticalRules = rules.filter(rule => rule.severity === 'critical').length;
+  const recentlyTriggered = rules.filter(rule => {
+    const lastSeen = new Date(rule.lastTriggered).getTime();
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    return lastSeen >= sevenDaysAgo;
+  }).length;
+  const severityBreakdown = severities.map(({ value }) => ({
+    value,
+    count: rules.filter(rule => rule.severity === value).length
+  }));
+  const mostTriggeredRules = [...rules]
+    .sort((a, b) => b.triggeredCount - a.triggeredCount)
+    .slice(0, 4);
+  const recentActivity = [
+    {
+      id: 'activity-1',
+      title: 'Critical malware rule tuned',
+      description: 'ShadowPad beacon rule updated with new JA3 fingerprints.',
+      timestamp: '2 hours ago'
+    },
+    {
+      id: 'activity-2',
+      title: 'Policy exemptions synced',
+      description: 'TLS SNI exemption list refreshed from compliance feed.',
+      timestamp: '5 hours ago'
+    },
+    {
+      id: 'activity-3',
+      title: 'New exploit signatures',
+      description: 'Four exploit kit signatures imported from upstream feed.',
+      timestamp: 'Yesterday'
+    }
+  ];
+
+  const filteredRules = rules.filter(rule => {
+    if (statusFilter !== 'all' && rule.status !== statusFilter) return false;
+    if (severityFilter !== 'all' && rule.severity !== severityFilter) return false;
+    if (actionFilter !== 'all' && rule.action !== actionFilter) return false;
+    if (categoryFilter !== 'all' && rule.category !== categoryFilter) return false;
+    if (recentOnly) {
+      const lastSeen = new Date(rule.lastTriggered).getTime();
+      if (Date.now() - lastSeen > 72 * 60 * 60 * 1000) return false;
+    }
+    return true;
+  });
 
   const [formData, setFormData] = useState<Partial<Rule>>({
     sid: '',
@@ -257,6 +423,11 @@ const Rules = () => {
     {
       accessorKey: 'category',
       header: 'Category',
+      cell: ({ row }) => (
+        <Badge variant="secondary" className="capitalize">
+          {row.getValue('category')}
+        </Badge>
+      ),
     },
     {
       accessorKey: 'severity',
@@ -361,18 +532,147 @@ const Rules = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="space-y-1">
-          <h2 className="text-2xl font-semibold tracking-tight">Rules Management</h2>
+          <p className="text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+            <Target className="h-4 w-4" /> Adaptive rule engine
+          </p>
+          <h2 className="text-3xl font-semibold tracking-tight">Rules management</h2>
           <p className="text-sm text-muted-foreground">
-            Manage and monitor your IDS/IPS rules
+            Fine tune Suricata/Snort signatures sourced from IDS Tower feeds.
           </p>
         </div>
-        <Button onClick={() => setIsModalOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add New Rule
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => toast.info('Baseline check scheduled')}>
+            <Bell className="mr-2 h-4 w-4" /> Notify changes
+          </Button>
+          <Button onClick={() => setIsModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" /> Add new rule
+          </Button>
+        </div>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Active rules</p>
+              <p className="text-3xl font-semibold">{activeRules}</p>
+            </div>
+            <Shield className="h-10 w-10 text-emerald-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Disabled / staged</p>
+              <p className="text-3xl font-semibold">{disabledRules}</p>
+            </div>
+            <Layers className="h-10 w-10 text-amber-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Critical coverage</p>
+              <p className="text-3xl font-semibold">{criticalRules}</p>
+            </div>
+            <AlertTriangle className="h-10 w-10 text-red-500" />
+          </CardContent>
+        </Card>
+        <Card className="bg-gradient-card border-border">
+          <CardContent className="flex items-center justify-between p-5">
+            <div>
+              <p className="text-sm text-muted-foreground">Triggered (72h)</p>
+              <p className="text-3xl font-semibold">{recentlyTriggered}</p>
+            </div>
+            <Clock className="h-10 w-10 text-sky-500" />
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="border-border bg-gradient-card">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Filter className="h-4 w-4" /> Intelligent filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="space-y-2">
+              <Label>Status</Label>
+              <div className="flex flex-wrap gap-2">
+                {['all', 'enabled', 'disabled'].map(option => (
+                  <Button
+                    key={option}
+                    variant={statusFilter === option ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setStatusFilter(option as 'all' | 'enabled' | 'disabled')}
+                  >
+                    <span className="capitalize">{option}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Severity</Label>
+              <div className="flex flex-wrap gap-2">
+                {['all', ...severities.map(severity => severity.value)].map(option => (
+                  <Button
+                    key={option}
+                    variant={severityFilter === option ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSeverityFilter(option as typeof severityFilter)}
+                  >
+                    <span className="capitalize">{option}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Action</Label>
+              <div className="flex flex-wrap gap-2">
+                {['all', ...actions.map(action => action.value)].map(option => (
+                  <Button
+                    key={option}
+                    variant={actionFilter === option ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setActionFilter(option as typeof actionFilter)}
+                  >
+                    <span className="capitalize">{option}</span>
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as typeof categoryFilter)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+            <div className="text-sm text-muted-foreground">
+              Showing <span className="font-semibold">{filteredRules.length}</span> of{' '}
+              <span className="font-semibold">{rules.length}</span> rules after contextual filters.
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch id="recent-only" checked={recentOnly} onCheckedChange={setRecentOnly} />
+              <Label htmlFor="recent-only">Only show rules triggered in the last 72h</Label>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -381,11 +681,88 @@ const Rules = () => {
         <CardContent>
           <DataTable
             columns={columns}
-            data={rules}
+            data={filteredRules}
             searchKey={['name', 'sid', 'category']}
             filterOptions={filterOptions}
+            onAdd={() => setIsModalOpen(true)}
+            addButtonLabel="Add Rule"
             searchPlaceholder="Search rules by name, SID, or category..."
+            pageSizeOptions={[5, 10, 20, 50]}
           />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Card className="lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <BarChart3 className="h-4 w-4" /> Severity distribution
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {severityBreakdown.map(({ value, count }) => {
+              const percentage = rules.length ? Math.round((count / rules.length) * 100) : 0;
+              return (
+                <div key={value}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="capitalize">{value}</span>
+                    <span>{percentage}%</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-muted">
+                    <div
+                      className={`h-2 rounded-full ${
+                        value === 'critical'
+                          ? 'bg-red-500'
+                          : value === 'high'
+                          ? 'bg-orange-400'
+                          : value === 'medium'
+                          ? 'bg-yellow-400'
+                          : 'bg-blue-400'
+                      }`}
+                      style={{ width: `${percentage}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Top triggered rules</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {mostTriggeredRules.map(rule => (
+              <div key={rule.id} className="flex items-start justify-between">
+                <div>
+                  <p className="font-medium text-sm">{rule.name}</p>
+                  <p className="text-xs text-muted-foreground uppercase">SID {rule.sid}</p>
+                </div>
+                <Badge variant="outline">{rule.triggeredCount} hits</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Recent activity</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {recentActivity.map(activity => (
+            <div key={activity.id} className="flex items-start gap-3">
+              <div className="rounded-full bg-primary/10 p-2">
+                <Clock className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <p className="font-medium">{activity.title}</p>
+                <p className="text-sm text-muted-foreground">{activity.description}</p>
+              </div>
+              <span className="ml-auto text-xs text-muted-foreground">{activity.timestamp}</span>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
@@ -513,13 +890,13 @@ const Rules = () => {
 
       {/* Delete Confirmation Dialog */}
       <Modal
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
         title="Delete Rule"
         size="sm"
         footer={
           <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDeleteModalOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={confirmDelete}>
