@@ -172,17 +172,11 @@ export interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
   ({ className, collapsed = false, onCollapse, collapsible = true, children, ...props }, ref) => {
-    const { isMobile, open, setOpen, toggleSidebar, state } = useSidebar();
-    const [isCollapsed, setIsCollapsed] = React.useState(collapsed);
-
-    React.useEffect(() => {
-      setIsCollapsed(collapsed);
-    }, [collapsed]);
+    const { isMobile, open, setOpen, toggleSidebar, state, isCollapsed, toggleCollapse } = useSidebar();
 
     const handleCollapse = () => {
-      const newState = !isCollapsed;
-      setIsCollapsed(newState);
-      onCollapse?.(newState);
+      toggleCollapse();
+      onCollapse?.(!isCollapsed);
     };
 
     // Close sidebar when clicking outside on mobile
@@ -243,7 +237,7 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
       <div
         ref={ref}
         className={cn(
-          "sidebar-container flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
+          "sidebar-container fixed left-0 top-0 z-40 flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
           isCollapsed ? "w-16" : "w-64",
           "hidden md:flex", // Hide on mobile, show on md and up
           className
@@ -406,13 +400,21 @@ SidebarMenuButton.displayName = "SidebarMenuButton"
 const SidebarInset = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
->(({ className, ...props }, ref) => (
-  <div
-    ref={ref}
-    className={cn("flex-1 overflow-auto", className)}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const { isCollapsed } = useSidebar();
+  
+  return (
+    <div
+      ref={ref}
+      className={cn(
+        "flex-1 overflow-auto transition-all duration-300 ease-in-out",
+        isCollapsed ? "md:ml-16" : "md:ml-64",
+        className
+      )}
+      {...props}
+    />
+  );
+})
 SidebarInset.displayName = "SidebarInset"
 
 export const SidebarTrigger = React.forwardRef<

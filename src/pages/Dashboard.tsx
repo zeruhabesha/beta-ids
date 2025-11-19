@@ -3,16 +3,17 @@ import { StatsCard } from "@/components/StatsCard";
 import { AlertChart } from "@/components/AlertChart";
 import { ProtocolChart } from "@/components/ProtocolChart";
 import { TopIPsTable } from "@/components/TopIPsTable";
+import { ResponsiveGrid, ResponsiveStack, ResponsiveHeader } from "@/components/ResponsiveContainer";
 
 const Dashboard = () => {
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
-        <p className="text-muted-foreground">Real-time network security monitoring</p>
-      </div>
+    <ResponsiveStack gap="lg" className="animate-fade-in">
+      <ResponsiveHeader
+        title="Dashboard Overview"
+        subtitle="Real-time network security monitoring"
+      />
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <ResponsiveGrid columns={4} gap="md">
         <StatsCard
           title="Total Alerts"
           value="1,247"
@@ -40,15 +41,15 @@ const Dashboard = () => {
           trend={2}
           variant="success"
         />
-      </div>
+      </ResponsiveGrid>
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-3">
         <AlertChart />
         <ProtocolChart />
       </div>
 
       <TopIPsTable />
-    </div>
+    </ResponsiveStack>
   );
 };
 

@@ -10,6 +10,11 @@ import Traffic from "./pages/Traffic";
 import Rules from "./pages/Rules";
 import Activity from "./pages/Activity";
 import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
+import SystemHealth from "./pages/SystemHealth";
+import Reports from "./pages/Reports";
+import Clusters from "./pages/Clusters";
+import Indicators from "./pages/Indicators";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,13 +24,18 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
           <Route path="/" element={<DashboardLayout><Dashboard /></DashboardLayout>} />
           <Route path="/alerts" element={<DashboardLayout><Alerts /></DashboardLayout>} />
           <Route path="/traffic" element={<DashboardLayout><Traffic /></DashboardLayout>} />
           <Route path="/rules" element={<DashboardLayout><Rules /></DashboardLayout>} />
           <Route path="/activity" element={<DashboardLayout><Activity /></DashboardLayout>} />
+          <Route path="/notifications" element={<DashboardLayout><Notifications /></DashboardLayout>} />
+          <Route path="/system-health" element={<DashboardLayout><SystemHealth /></DashboardLayout>} />
+          <Route path="/reports" element={<DashboardLayout><Reports /></DashboardLayout>} />
+          <Route path="/clusters" element={<DashboardLayout><Clusters /></DashboardLayout>} />
+          <Route path="/indicators" element={<DashboardLayout><Indicators /></DashboardLayout>} />
           <Route path="/settings" element={<DashboardLayout><Settings /></DashboardLayout>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

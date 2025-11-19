@@ -9,18 +9,13 @@ import {
   AlertCircle,
   AlertTriangle,
   Bell,
-  Check,
   Filter,
   Shield,
   Layers,
   BarChart3,
   Clock,
   FileSpreadsheet,
-  UploadCloud,
-  Server,
-  Radar,
-  Activity,
-  Clock
+  UploadCloud
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -61,28 +56,7 @@ type Rule = {
   description: string;
 };
 
-type Cluster = {
-  id: string;
-  name: string;
-  nodes: number;
-  coverage: number;
-  status: 'healthy' | 'maintenance' | 'degraded';
-  leadIndicator: string;
-  lastSynced: string;
-};
-
-type Indicator = {
-  id: string;
-  indicator: string;
-  type: 'ip' | 'domain' | 'hash';
-  severity: Rule['severity'];
-  confidence: number;
-  status: 'active' | 'retired' | 'under-review';
-  cluster: string;
-  lastSeen: string;
-};
-
-type ImportContext = 'rules' | 'clusters' | 'indicators';
+type ImportContext = 'rules';
 
 const actions = [
   { value: 'alert', label: 'Alert' },
@@ -112,14 +86,6 @@ const Rules = () => {
     rules: {
       title: 'rule pack',
       helper: 'Ensure SID, severity, category, and action columns exist in the spreadsheet.'
-    },
-    clusters: {
-      title: 'cluster inventory',
-      helper: 'Include cluster name, sensor count, coverage percentage, and health status.'
-    },
-    indicators: {
-      title: 'indicator feed',
-      helper: 'Indicator, type, severity, and confidence columns are required for ingestion.'
     }
   };
 
@@ -154,45 +120,6 @@ const Rules = () => {
       sid: '2000003',
       name: 'ET MALWARE Suspicious Executable Download',
       category: 'malware',
-      severity: 'critical',
-      action: 'drop',
-      status: 'enabled',
-      triggeredCount: 65,
-      lastTriggered: '2025-02-16T16:45:00Z',
-      description: 'Detects suspicious executable downloads from untrusted hosts.'
-    },
-    {
-      id: '4',
-      sid: '2000004',
-      name: 'ET POLICY Outbound TLS Without SNI',
-      category: 'policy-violation',
-      severity: 'medium',
-      action: 'alert',
-      status: 'enabled',
-      triggeredCount: 12,
-      lastTriggered: '2025-02-16T11:05:00Z',
-      description: 'Monitors TLS sessions that omit SNI, a common evasion tactic.'
-    },
-    {
-      id: '5',
-      sid: '2000005',
-      name: 'ET WEB SQL Injection Attempt',
-      category: 'web-application-attack',
-      severity: 'high',
-      action: 'drop',
-      status: 'enabled',
-      triggeredCount: 33,
-      lastTriggered: '2025-02-13T18:15:00Z',
-      description: 'Blocks common SQL injection payloads targeting customer portals.'
-    },
-    {
-      id: '6',
-      sid: '2000006',
-      name: 'ET DOS Slowloris Keep-Alive Flood',
-      category: 'denial-of-service',
-      severity: 'critical',
-      action: 'drop',
-      status: 'enabled',
       severity: 'critical',
       action: 'drop',
       status: 'enabled',
@@ -310,68 +237,7 @@ const Rules = () => {
     }
   ]);
 
-  const [clusters, setClusters] = useState<Cluster[]>([
-    {
-      id: 'cluster-1',
-      name: 'Edge perimeter cluster',
-      nodes: 6,
-      coverage: 92,
-      status: 'healthy',
-      leadIndicator: 'TLS JA3 pack',
-      lastSynced: '5m ago'
-    },
-    {
-      id: 'cluster-2',
-      name: 'Cloud workload cluster',
-      nodes: 4,
-      coverage: 81,
-      status: 'degraded',
-      leadIndicator: 'Emotet callbacks',
-      lastSynced: '28m ago'
-    },
-    {
-      id: 'cluster-3',
-      name: 'OT / plant sensors',
-      nodes: 3,
-      coverage: 68,
-      status: 'maintenance',
-      leadIndicator: 'Modbus anomaly set',
-      lastSynced: '1h ago'
-    }
-  ]);
 
-  const [indicators, setIndicators] = useState<Indicator[]>([
-    {
-      id: 'indicator-1',
-      indicator: '45.77.23.11',
-      type: 'ip',
-      severity: 'critical',
-      confidence: 96,
-      status: 'active',
-      cluster: 'Edge perimeter cluster',
-      lastSeen: '2 hours ago'
-    },
-    {
-      id: 'indicator-2',
-      indicator: 'suspicious-updates.net',
-      type: 'domain',
-      severity: 'high',
-      confidence: 82,
-      status: 'under-review',
-      cluster: 'Cloud workload cluster',
-      lastSeen: '45 minutes ago'
-    },
-    {
-      id: 'indicator-3',
-      indicator: 'd41d8cd98f00b204e9800998ecf8427e',
-      type: 'hash',
-      severity: 'medium',
-      confidence: 60,
-      status: 'retired',
-      cluster: 'OT / plant sensors',
-      lastSeen: 'Yesterday'
-    }
-  ]);
 
   // State for modal
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -458,16 +324,6 @@ const Rules = () => {
     return true;
   });
 
-  const [formData, setFormData] = useState<Partial<Rule>>({
-    sid: '',
-    name: '',
-    category: '',
-    severity: 'medium',
-    action: 'alert',
-    status: 'enabled',
-    description: ''
-  });
-
   const [formData, setFormData] = useState<Partial<Rule>>(defaultRuleForm);
 
   const severityColorMap: Record<Rule['severity'], string> = {
@@ -477,17 +333,7 @@ const Rules = () => {
     critical: 'bg-red-100 text-red-800'
   };
 
-  const clusterStatusColorMap: Record<Cluster['status'], string> = {
-    healthy: 'bg-emerald-100 text-emerald-700',
-    degraded: 'bg-amber-100 text-amber-700',
-    maintenance: 'bg-slate-200 text-slate-700'
-  };
 
-  const indicatorStatusColorMap: Record<Indicator['status'], string> = {
-    active: 'bg-emerald-100 text-emerald-700',
-    'under-review': 'bg-blue-100 text-blue-800',
-    retired: 'bg-slate-200 text-slate-700'
-  };
 
   const openImportModal = (context: ImportContext) => {
     setImportContext(context);
@@ -579,32 +425,7 @@ const Rules = () => {
       setRules(prev => [...prev, importedRule]);
     }
 
-    if (importContext === 'clusters') {
-      const importedCluster: Cluster = {
-        id: `cluster-${Date.now()}`,
-        name: `Imported cluster (${importFile.name})`,
-        nodes: 5,
-        coverage: 75,
-        status: 'healthy',
-        leadIndicator: 'Spreadsheet ingest',
-        lastSynced: 'Just now'
-      };
-      setClusters(prev => [importedCluster, ...prev]);
-    }
 
-    if (importContext === 'indicators') {
-      const importedIndicator: Indicator = {
-        id: `indicator-${Date.now()}`,
-        indicator: `ioc-${Date.now()}.imported`,
-        type: 'domain',
-        severity: 'high',
-        confidence: 78,
-        status: 'under-review',
-        cluster: clusters[0]?.name || 'Edge perimeter cluster',
-        lastSeen: 'Just now'
-      };
-      setIndicators(prev => [importedIndicator, ...prev]);
-    }
 
     toast.success(`${importFile.name} queued for the ${importCopy[importContext].title} workflow${
       importDryRun ? ' (validation only).' : '.'
@@ -613,63 +434,7 @@ const Rules = () => {
     closeImportModal();
   };
 
-  const handleCreateCluster = () => {
-    const newCluster: Cluster = {
-      id: `cluster-${Date.now()}`,
-      name: `Ad-hoc cluster ${clusters.length + 1}`,
-      nodes: 2,
-      coverage: Math.min(100, 55 + Math.round(Math.random() * 30)),
-      status: 'maintenance',
-      leadIndicator: 'Custom tuning',
-      lastSynced: 'Just now'
-    };
-    setClusters(prev => [newCluster, ...prev]);
-    toast.success('Draft cluster created for manual tuning.');
-  };
 
-  const handleClusterSync = (clusterId: string) => {
-    setClusters(prev =>
-      prev.map(cluster =>
-        cluster.id === clusterId ? { ...cluster, lastSynced: 'Just now' } : cluster
-      )
-    );
-    toast.success('Cluster sync scheduled.');
-  };
-
-  const handleCreateIndicator = () => {
-    const newIndicator: Indicator = {
-      id: `indicator-${Date.now()}`,
-      indicator: `ioc-${Date.now()}.example`,
-      type: 'domain',
-      severity: 'medium',
-      confidence: 55 + Math.round(Math.random() * 30),
-      status: 'under-review',
-      cluster: clusters[1]?.name || clusters[0]?.name || 'Edge perimeter cluster',
-      lastSeen: 'Just now'
-    };
-    setIndicators(prev => [newIndicator, ...prev]);
-    toast.info('New indicator staged for review.');
-  };
-
-  const acknowledgeIndicator = (indicatorId: string) => {
-    setIndicators(prev =>
-      prev.map(indicator =>
-        indicator.id === indicatorId ? { ...indicator, status: 'retired' } : indicator
-      )
-    );
-    toast.success('Indicator acknowledged and retired.');
-  };
-
-  const escalateIndicator = (indicatorId: string) => {
-    setIndicators(prev =>
-      prev.map(indicator =>
-        indicator.id === indicatorId
-          ? { ...indicator, severity: 'critical', status: 'active' }
-          : indicator
-      )
-    );
-    toast.warning('Indicator escalated to critical coverage.');
-  };
 
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -948,51 +713,6 @@ const Rules = () => {
         </Card>
       </div>
 
-          <Button onClick={() => setIsModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Add new rule
-          </Button>
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Card className="bg-gradient-card border-border">
-          <CardContent className="flex items-center justify-between p-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Active rules</p>
-              <p className="text-3xl font-semibold">{activeRules}</p>
-            </div>
-            <Shield className="h-10 w-10 text-emerald-500" />
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-border">
-          <CardContent className="flex items-center justify-between p-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Disabled / staged</p>
-              <p className="text-3xl font-semibold">{disabledRules}</p>
-            </div>
-            <Layers className="h-10 w-10 text-amber-500" />
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-border">
-          <CardContent className="flex items-center justify-between p-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Critical coverage</p>
-              <p className="text-3xl font-semibold">{criticalRules}</p>
-            </div>
-            <AlertTriangle className="h-10 w-10 text-red-500" />
-          </CardContent>
-        </Card>
-        <Card className="bg-gradient-card border-border">
-          <CardContent className="flex items-center justify-between p-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Triggered (72h)</p>
-              <p className="text-3xl font-semibold">{recentlyTriggered}</p>
-            </div>
-            <Clock className="h-10 w-10 text-sky-500" />
-          </CardContent>
-        </Card>
-      </div>
-
       <Card className="border-border bg-gradient-card">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
@@ -1090,8 +810,6 @@ const Rules = () => {
             onImport={() => openImportModal('rules')}
             addButtonLabel="Create rule"
             importButtonLabel="Import Excel"
-            onAdd={() => setIsModalOpen(true)}
-            addButtonLabel="Add Rule"
             searchPlaceholder="Search rules by name, SID, or category..."
             pageSizeOptions={[5, 10, 20, 50]}
           />
@@ -1152,112 +870,7 @@ const Rules = () => {
         </Card>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Server className="h-4 w-4" /> Sensor clusters
-            </CardTitle>
-            <CreateMenuButton label="Cluster" onCreate={handleCreateCluster} context="clusters" size="sm" />
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {clusters.map(cluster => (
-              <div key={cluster.id} className="space-y-3 rounded-lg border bg-card/40 p-4">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-medium">{cluster.name}</p>
-                    <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      <span>{cluster.nodes} sensors</span>
-                      <span>{cluster.leadIndicator}</span>
-                      <span>Last sync {cluster.lastSynced}</span>
-                    </div>
-                  </div>
-                  <Badge className={`capitalize ${clusterStatusColorMap[cluster.status]}`}>
-                    {cluster.status}
-                  </Badge>
-                </div>
-                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                  <div className="w-full md:max-w-sm">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>Coverage</span>
-                      <span>{cluster.coverage}%</span>
-                    </div>
-                    <div className="mt-2 h-2 rounded-full bg-muted">
-                      <div
-                        className={`h-2 rounded-full ${
-                          cluster.status === 'healthy'
-                            ? 'bg-emerald-500'
-                            : cluster.status === 'degraded'
-                            ? 'bg-amber-500'
-                            : 'bg-slate-400'
-                        }`}
-                        style={{ width: `${cluster.coverage}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={() => handleClusterSync(cluster.id)}>
-                      <Activity className="mr-2 h-4 w-4" /> Sync
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => openImportModal('clusters')}>
-                      <UploadCloud className="mr-2 h-4 w-4" /> Import
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
 
-        <Card>
-          <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Radar className="h-4 w-4" /> Indicator intelligence
-            </CardTitle>
-            <CreateMenuButton
-              label="Indicator"
-              onCreate={handleCreateIndicator}
-              context="indicators"
-              size="sm"
-            />
-          </CardHeader>
-          <CardContent className="space-y-3">
-            {indicators.map(indicator => (
-              <div key={indicator.id} className="space-y-3 rounded-lg border bg-card/40 p-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="font-medium break-all">{indicator.indicator}</p>
-                    <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                      <span className="uppercase">{indicator.type}</span>
-                      <span>Confidence {indicator.confidence}%</span>
-                      <span>{indicator.cluster}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-col gap-2 text-right">
-                    <Badge className={`capitalize ${severityColorMap[indicator.severity]}`}>
-                      {indicator.severity}
-                    </Badge>
-                    <Badge className={`capitalize ${indicatorStatusColorMap[indicator.status]}`}>
-                      {indicator.status.replace('-', ' ')}
-                    </Badge>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-muted-foreground">Last seen {indicator.lastSeen}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={() => acknowledgeIndicator(indicator.id)}>
-                      <Check className="mr-2 h-4 w-4" /> Ack
-                    </Button>
-                    <Button size="sm" variant="ghost" onClick={() => escalateIndicator(indicator.id)}>
-                      <AlertTriangle className="mr-2 h-4 w-4" /> Escalate
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
 
       <Card>
         <CardHeader>

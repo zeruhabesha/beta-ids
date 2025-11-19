@@ -10,6 +10,8 @@ import {
 } from "./ui/dropdown-menu";
 import { Badge } from "./ui/badge";
 import { ScrollArea } from "./ui/scroll-area";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 type Notification = {
   id: string;
@@ -21,8 +23,8 @@ type Notification = {
 };
 
 export function NotificationBell() {
-  // Mock notifications - replace with your actual data
-  const notifications: Notification[] = [
+  const navigate = useNavigate();
+  const [notifications, setNotifications] = useState<Notification[]>([
     {
       id: '1',
       title: 'New Alert',
@@ -47,9 +49,23 @@ export function NotificationBell() {
       read: true,
       type: 'success'
     },
-  ];
+  ]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAsRead = (id: string) => {
+    setNotifications(prev =>
+      prev.map(n => (n.id === id ? { ...n, read: true } : n))
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  };
+
+  const clearAll = () => {
+    setNotifications([]);
+  };
 
   const getNotificationColor = (type: string) => {
     switch(type) {
@@ -82,10 +98,21 @@ export function NotificationBell() {
             Notifications
           </DropdownMenuLabel>
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 text-xs"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+            >
               Mark all as read
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 px-2 text-xs"
+              onClick={clearAll}
+            >
               Clear all
             </Button>
           </div>
@@ -110,7 +137,15 @@ export function NotificationBell() {
                     </p>
                   </div>
                   {!notification.read && (
-                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-2">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-6 w-6 ml-2"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        markAsRead(notification.id);
+                      }}
+                    >
                       <Check className="h-3.5 w-3.5" />
                     </Button>
                   )}
@@ -125,7 +160,11 @@ export function NotificationBell() {
         </ScrollArea>
         
         <div className="p-2 border-t">
-          <Button variant="ghost" className="w-full justify-center text-sm">
+          <Button 
+            variant="ghost" 
+            className="w-full justify-center text-sm"
+            onClick={() => navigate('/notifications')}
+          >
             View all notifications
           </Button>
         </div>
