@@ -54,6 +54,33 @@ const Activity = () => {
     }
   };
 
+  const severityToneMap: Record<ActivityLog['severity'], SeverityTone> = {
+    high: {
+      row: "border-l-4 border-destructive/60 bg-destructive/5 hover:bg-destructive/10",
+      iconBg: "bg-destructive/10",
+      iconText: "text-destructive",
+    },
+    medium: {
+      row: "border-l-4 border-warning/60 bg-warning/5 hover:bg-warning/10",
+      iconBg: "bg-warning/10",
+      iconText: "text-warning",
+    },
+    success: {
+      row: "border-l-4 border-success/60 bg-success/5 hover:bg-success/10",
+      iconBg: "bg-success/10",
+      iconText: "text-success",
+    },
+    info: {
+      row: "border-l-4 border-info/60 bg-info/5 hover:bg-info/10",
+      iconBg: "bg-info/10",
+      iconText: "text-info",
+    },
+  };
+
+  const getSeverityTone = (severity: ActivityLog['severity']): SeverityTone => {
+    return severityToneMap[severity] ?? severityToneMap.info;
+  };
+
   const alertCount = activityLogs.filter(log => log.type === "alert").length;
   const successCount = activityLogs.filter(log => log.type === "success").length;
   const warningCount = activityLogs.filter(log => log.type === "warning").length;
