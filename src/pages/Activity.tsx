@@ -107,6 +107,19 @@ const Activity = () => {
               <span className="text-sm font-semibold capitalize">{row.original.type}</span>
               <span className="text-xs text-muted-foreground">{row.original.severity} event</span>
             </div>
+      accessorKey: 'timestamp',
+      header: 'Timestamp',
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.timestamp}</span>,
+    },
+    {
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row }) => {
+        const Icon = getIcon(row.original.type);
+        return (
+          <div className="flex items-center gap-2 capitalize">
+            <Icon className="h-4 w-4" />
+            {row.original.type}
           </div>
         );
       },
@@ -126,6 +139,8 @@ const Activity = () => {
           </div>
         </div>
       ),
+      header: 'Message',
+      cell: ({ row }) => <span className="text-sm">{row.original.message}</span>,
     },
     {
       accessorKey: 'severity',
@@ -135,6 +150,11 @@ const Activity = () => {
           {row.original.severity}
         </Badge>
       ),
+    },
+    {
+      accessorKey: 'user',
+      header: 'User',
+      cell: ({ row }) => <span className="font-mono">@{row.original.user}</span>,
     },
   ];
 
