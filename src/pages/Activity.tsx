@@ -3,8 +3,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatsCard } from "@/components/StatsCard";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 
-const activityLogs = [
+type ActivityLog = {
+  id: number;
+  timestamp: string;
+  type: 'alert' | 'info' | 'success' | 'warning';
+  severity: 'high' | 'medium' | 'success' | 'info';
+  message: string;
+  user: string;
+};
+
+type SeverityTone = {
+  row: string;
+  iconBg: string;
+  iconText: string;
+};
+
+const activityLogs: ActivityLog[] = [
   { id: 1, timestamp: "2025-11-04 14:23:45", type: "alert", severity: "high", message: "Malware detected and blocked from 192.168.1.45", user: "system" },
   { id: 2, timestamp: "2025-11-04 14:22:18", type: "info", severity: "info", message: "Rule 2100499 triggered for port scan detection", user: "system" },
   { id: 3, timestamp: "2025-11-04 14:20:03", type: "success", severity: "success", message: "System health check completed successfully", user: "admin" },
@@ -43,9 +60,108 @@ const Activity = () => {
     }
   };
 
+  const severityToneMap: Record<ActivityLog['severity'], SeverityTone> = {
+    high: {
+      row: "border-l-4 border-destructive/60 bg-destructive/5 hover:bg-destructive/10",
+      iconBg: "bg-destructive/10",
+      iconText: "text-destructive",
+    },
+    medium: {
+      row: "border-l-4 border-warning/60 bg-warning/5 hover:bg-warning/10",
+      iconBg: "bg-warning/10",
+      iconText: "text-warning",
+    },
+    success: {
+      row: "border-l-4 border-success/60 bg-success/5 hover:bg-success/10",
+      iconBg: "bg-success/10",
+      iconText: "text-success",
+    },
+    info: {
+      row: "border-l-4 border-info/60 bg-info/5 hover:bg-info/10",
+      iconBg: "bg-info/10",
+      iconText: "text-info",
+    },
+  };
+
+  const getSeverityTone = (severity: ActivityLog['severity']): SeverityTone => {
+    return severityToneMap[severity] ?? severityToneMap.info;
+  };
+
   const alertCount = activityLogs.filter(log => log.type === "alert").length;
   const successCount = activityLogs.filter(log => log.type === "success").length;
   const warningCount = activityLogs.filter(log => log.type === "warning").length;
+
+  const activityColumns: ColumnDef<ActivityLog>[] = [
+    {
+      accessorKey: 'type',
+      header: 'Event',
+      cell: ({ row }) => {
+        const Icon = getIcon(row.original.type);
+        const tone = getSeverityTone(row.original.severity);
+        return (
+          <div className="flex items-center gap-3">
+            <div className={`rounded-full p-2 ${tone.iconBg}`}>
+              <Icon className={`h-4 w-4 ${tone.iconText}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold capitalize">{row.original.type}</span>
+              <span className="text-xs text-muted-foreground">{row.original.severity} event</span>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'message',
+      header: 'Details',
+      cell: ({ row }) => (
+        <div className="space-y-2">
+          <p className="text-sm font-medium leading-relaxed">{row.original.message}</p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {row.original.timestamp}
+            </span>
+            <span className="font-mono">@{row.original.user}</span>
+          </div>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'severity',
+      header: 'Severity',
+      cell: ({ row }) => (
+        <Badge variant={getVariant(row.original.severity)} className="capitalize">
+          {row.original.severity}
+        </Badge>
+      ),
+    },
+  ];
+
+  const activityFilterOptions = [
+    {
+      columnId: 'type',
+      title: 'Type',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'Alert', value: 'alert' },
+        { label: 'Info', value: 'info' },
+        { label: 'Success', value: 'success' },
+        { label: 'Warning', value: 'warning' },
+      ],
+    },
+    {
+      columnId: 'severity',
+      title: 'Severity',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'High', value: 'high' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Success', value: 'success' },
+        { label: 'Info', value: 'info' },
+      ],
+    },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -83,6 +199,26 @@ const Activity = () => {
           variant="success"
         />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity Log</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={activityColumns}
+            data={activityLogs}
+            searchKey={["message", "user", "timestamp"]}
+            filterOptions={activityFilterOptions}
+            searchPlaceholder="Search events by message, user, or timestamp..."
+            pageSizeOptions={[5, 10, 20]}
+            rowClassName={(row) => {
+              const tone = getSeverityTone((row.original as ActivityLog).severity);
+              return `bg-card/40 transition-colors ${tone.row}`;
+            }}
+          />
+        </CardContent>
+      </Card>
 
       <Card className="bg-gradient-card border-border">
         <CardHeader>
