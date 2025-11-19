@@ -29,6 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
 import { Progress } from "@/components/ui/progress";
@@ -127,6 +129,70 @@ const Clusters = () => {
         return <Clock className="h-4 w-4 text-slate-600" />;
     }
   };
+
+  const clusterColumns: ColumnDef<Cluster>[] = [
+    {
+      accessorKey: 'name',
+      header: 'Cluster',
+      cell: ({ row }) => (
+        <div>
+          <p className="font-semibold">{row.original.name}</p>
+          {row.original.location && (
+            <p className="text-xs text-muted-foreground">{row.original.location}</p>
+          )}
+        </div>
+      )
+    },
+    {
+      accessorKey: 'nodes',
+      header: 'Nodes',
+      cell: ({ row }) => <span className="font-medium">{row.original.nodes}</span>
+    },
+    {
+      accessorKey: 'coverage',
+      header: 'Coverage',
+      cell: ({ row }) => (
+        <div>
+          <span className="text-sm font-medium">{row.original.coverage}%</span>
+          <Progress value={row.original.coverage} className="mt-1 h-1.5" />
+        </div>
+      )
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => (
+        <Badge className={`capitalize text-xs ${getStatusColor(row.original.status)}`}>
+          {row.original.status}
+        </Badge>
+      )
+    },
+    {
+      accessorKey: 'leadIndicator',
+      header: 'Lead Indicator',
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">{row.original.leadIndicator}</span>
+      )
+    },
+    {
+      accessorKey: 'lastSynced',
+      header: 'Last Synced',
+      cell: ({ row }) => <span className="text-sm">{row.original.lastSynced}</span>
+    }
+  ];
+
+  const clusterFilterOptions = [
+    {
+      columnId: 'status',
+      title: 'Status',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'Healthy', value: 'healthy' },
+        { label: 'Degraded', value: 'degraded' },
+        { label: 'Maintenance', value: 'maintenance' },
+      ],
+    },
+  ];
 
   const filteredClusters = clusters.filter(cluster => {
     if (statusFilter !== 'all' && cluster.status !== statusFilter) return false;
@@ -319,6 +385,24 @@ const Clusters = () => {
             </div>
           </div>
         </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Cluster Inventory</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={clusterColumns}
+            data={filteredClusters}
+            searchKey={["name", "leadIndicator", "location"]}
+            filterOptions={clusterFilterOptions}
+            searchPlaceholder="Search clusters by name, location, or indicator..."
+            pageSizeOptions={[5, 10, 20]}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+          />
+        </CardContent>
       </Card>
 
       <div className="space-y-3 sm:space-y-4">
