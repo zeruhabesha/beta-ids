@@ -3,8 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { StatsCard } from "@/components/StatsCard";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 
-const activityLogs = [
+type ActivityLog = {
+  id: number;
+  timestamp: string;
+  type: 'alert' | 'info' | 'success' | 'warning';
+  severity: 'high' | 'medium' | 'success' | 'info';
+  message: string;
+  user: string;
+};
+
+const activityLogs: ActivityLog[] = [
   { id: 1, timestamp: "2025-11-04 14:23:45", type: "alert", severity: "high", message: "Malware detected and blocked from 192.168.1.45", user: "system" },
   { id: 2, timestamp: "2025-11-04 14:22:18", type: "info", severity: "info", message: "Rule 2100499 triggered for port scan detection", user: "system" },
   { id: 3, timestamp: "2025-11-04 14:20:03", type: "success", severity: "success", message: "System health check completed successfully", user: "admin" },
@@ -47,6 +58,71 @@ const Activity = () => {
   const successCount = activityLogs.filter(log => log.type === "success").length;
   const warningCount = activityLogs.filter(log => log.type === "warning").length;
 
+  const activityColumns: ColumnDef<ActivityLog>[] = [
+    {
+      accessorKey: 'timestamp',
+      header: 'Timestamp',
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.timestamp}</span>,
+    },
+    {
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row }) => {
+        const Icon = getIcon(row.original.type);
+        return (
+          <div className="flex items-center gap-2 capitalize">
+            <Icon className="h-4 w-4" />
+            {row.original.type}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: 'message',
+      header: 'Message',
+      cell: ({ row }) => <span className="text-sm">{row.original.message}</span>,
+    },
+    {
+      accessorKey: 'severity',
+      header: 'Severity',
+      cell: ({ row }) => (
+        <Badge variant={getVariant(row.original.severity)} className="capitalize">
+          {row.original.severity}
+        </Badge>
+      ),
+    },
+    {
+      accessorKey: 'user',
+      header: 'User',
+      cell: ({ row }) => <span className="font-mono">@{row.original.user}</span>,
+    },
+  ];
+
+  const activityFilterOptions = [
+    {
+      columnId: 'type',
+      title: 'Type',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'Alert', value: 'alert' },
+        { label: 'Info', value: 'info' },
+        { label: 'Success', value: 'success' },
+        { label: 'Warning', value: 'warning' },
+      ],
+    },
+    {
+      columnId: 'severity',
+      title: 'Severity',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'High', value: 'high' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Success', value: 'success' },
+        { label: 'Info', value: 'info' },
+      ],
+    },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -83,6 +159,22 @@ const Activity = () => {
           variant="success"
         />
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity Log</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={activityColumns}
+            data={activityLogs}
+            searchKey={["message", "user", "timestamp"]}
+            filterOptions={activityFilterOptions}
+            searchPlaceholder="Search events by message, user, or timestamp..."
+            pageSizeOptions={[5, 10, 20]}
+          />
+        </CardContent>
+      </Card>
 
       <Card className="bg-gradient-card border-border">
         <CardHeader>
