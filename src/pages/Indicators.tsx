@@ -30,6 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DataTable } from "@/components/ui/data-table";
+import { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { Modal } from "@/components/ui/modal";
 
@@ -158,6 +160,89 @@ const Indicators = () => {
         return '📎';
     }
   };
+
+  const indicatorColumns: ColumnDef<Indicator>[] = [
+    {
+      accessorKey: 'indicator',
+      header: 'Indicator',
+      cell: ({ row }) => (
+        <div>
+          <p className="font-mono font-semibold text-sm break-all">{row.original.indicator}</p>
+          <p className="text-xs text-muted-foreground capitalize">{row.original.type}</p>
+        </div>
+      )
+    },
+    {
+      accessorKey: 'severity',
+      header: 'Severity',
+      cell: ({ row }) => (
+        <Badge className={`capitalize text-xs ${getSeverityColor(row.original.severity)}`}>
+          {row.original.severity}
+        </Badge>
+      )
+    },
+    {
+      accessorKey: 'status',
+      header: 'Status',
+      cell: ({ row }) => (
+        <Badge className={`capitalize text-xs ${getStatusColor(row.original.status)}`}>
+          {row.original.status.replace('-', ' ')}
+        </Badge>
+      )
+    },
+    {
+      accessorKey: 'confidence',
+      header: 'Confidence',
+      cell: ({ row }) => (
+        <span className="text-sm font-medium">{row.original.confidence}%</span>
+      )
+    },
+    {
+      accessorKey: 'cluster',
+      header: 'Cluster',
+      cell: ({ row }) => <span className="text-sm">{row.original.cluster}</span>
+    },
+    {
+      accessorKey: 'lastSeen',
+      header: 'Last Seen',
+      cell: ({ row }) => <span className="text-sm">{row.original.lastSeen}</span>
+    },
+  ];
+
+  const indicatorFilterOptions = [
+    {
+      columnId: 'severity',
+      title: 'Severity',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'Critical', value: 'critical' },
+        { label: 'High', value: 'high' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'Low', value: 'low' },
+      ],
+    },
+    {
+      columnId: 'status',
+      title: 'Status',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'Active', value: 'active' },
+        { label: 'Under Review', value: 'under-review' },
+        { label: 'Retired', value: 'retired' },
+      ],
+    },
+    {
+      columnId: 'type',
+      title: 'Type',
+      options: [
+        { label: 'All', value: 'all' },
+        { label: 'IP', value: 'ip' },
+        { label: 'Domain', value: 'domain' },
+        { label: 'Hash', value: 'hash' },
+        { label: 'URL', value: 'url' },
+      ],
+    },
+  ];
 
   const filteredIndicators = indicators.filter(indicator => {
     if (typeFilter !== 'all' && indicator.type !== typeFilter) return false;
@@ -377,6 +462,24 @@ const Indicators = () => {
             </div>
           </div>
         </CardHeader>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Indicator Inventory</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={indicatorColumns}
+            data={filteredIndicators}
+            searchKey={["indicator", "cluster", "description"]}
+            filterOptions={indicatorFilterOptions}
+            searchPlaceholder="Search indicators by value, cluster, or description..."
+            pageSizeOptions={[5, 10, 20]}
+            onEdit={handleEdit}
+            onDelete={handleDeleteClick}
+          />
+        </CardContent>
       </Card>
 
       <div className="space-y-2 sm:space-y-3">

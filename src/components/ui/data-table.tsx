@@ -2,6 +2,7 @@ import * as React from "react"
 import {
   ColumnDef,
   ColumnFiltersState,
+  Row,
   SortingState,
   VisibilityState,
   flexRender,
@@ -12,6 +13,7 @@ import {
   useReactTable,
   type FilterFn,
 } from "@tanstack/react-table"
+import { cn } from "@/lib/utils"
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -64,6 +66,7 @@ interface DataTableProps<TData, TValue> {
   showPagination?: boolean
   searchPlaceholder?: string
   pageSizeOptions?: number[]
+  rowClassName?: (row: Row<TData>) => string | undefined
 }
 
 export function DataTable<TData, TValue>({
@@ -80,6 +83,7 @@ export function DataTable<TData, TValue>({
   showPagination = true,
   searchPlaceholder,
   pageSizeOptions = [5, 10, 20, 50],
+  rowClassName,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -285,6 +289,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
+                  className={cn(rowClassName?.(row))}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

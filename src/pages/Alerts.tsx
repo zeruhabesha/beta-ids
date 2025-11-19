@@ -34,6 +34,11 @@ const Alerts = () => {
     { id: 10, timestamp: "2025-11-04 14:03:12", signature: "ET MALWARE Ransomware Activity", srcIP: "203.0.113.77", destIP: "192.168.1.55", severity: "high", protocol: "TCP", action: "drop" },
   ]);
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [severityFilter, setSeverityFilter] = useState<"all" | "high" | "medium" | "low">("all");
+  const [protocolFilter, setProtocolFilter] = useState<"all" | "TCP" | "UDP" | "HTTP" | "DNS" | "TLS" | "SSH">("all");
+  const [actionFilter, setActionFilter] = useState<"all" | "alert" | "drop">("all");
+
   const getSeverityVariant = (severity: string) => {
     switch (severity) {
       case "high": return "destructive";
@@ -116,17 +121,29 @@ const Alerts = () => {
     },
     {
       id: "actions",
+      header: "Actions",
       cell: ({ row }) => {
         const alert = row.original;
         return (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(alert.id)}
-            aria-label="Delete alert"
-          >
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleClearAlert(alert.id)}
+              aria-label="Clear alert"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleDelete(alert.id)}
+              aria-label="Delete alert"
+              className="text-red-500 hover:text-red-500"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         );
       },
     },
@@ -175,8 +192,22 @@ const Alerts = () => {
     setSearchTerm("");
     setSeverityFilter("all");
     setProtocolFilter("all");
+    setActionFilter("all");
     toast.info("Filters cleared");
   };
+
+  const filteredAlerts = alerts.filter((alert) => {
+    const matchesSearch =
+      !searchTerm ||
+      `${alert.signature} ${alert.srcIP} ${alert.destIP} ${alert.timestamp}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+    const matchesSeverity = severityFilter === "all" || alert.severity === severityFilter;
+    const matchesProtocol = protocolFilter === "all" || alert.protocol === protocolFilter;
+    const matchesAction = actionFilter === "all" || alert.action === actionFilter;
+
+    return matchesSearch && matchesSeverity && matchesProtocol && matchesAction;
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -237,6 +268,16 @@ const Alerts = () => {
                 <SelectItem value="SSH">SSH</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={actionFilter} onValueChange={setActionFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Action" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Actions</SelectItem>
+                <SelectItem value="alert">Alert</SelectItem>
+                <SelectItem value="drop">Drop</SelectItem>
+              </SelectContent>
+            </Select>
             <Button variant="outline" onClick={clearFilters} className="gap-2">
               <X className="h-4 w-4" />
               Clear Filters
@@ -249,53 +290,18 @@ const Alerts = () => {
       </Card>
 
       <Card className="bg-gradient-card border-border">
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Timestamp</TableHead>
-                <TableHead>Signature</TableHead>
-                <TableHead>Source IP</TableHead>
-                <TableHead>Dest IP</TableHead>
-                <TableHead>Severity</TableHead>
-                <TableHead>Protocol</TableHead>
-                <TableHead>Action</TableHead>
-                <TableHead></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredAlerts.map((alert) => (
-                <TableRow key={alert.id} className="hover:bg-accent/50 transition-colors">
-                  <TableCell className="font-mono text-xs">{alert.timestamp}</TableCell>
-                  <TableCell className="max-w-xs truncate">{alert.signature}</TableCell>
-                  <TableCell className="font-mono text-sm">{alert.srcIP}</TableCell>
-                  <TableCell className="font-mono text-sm">{alert.destIP}</TableCell>
-                  <TableCell>
-                    <Badge variant={getSeverityVariant(alert.severity)} className="capitalize">
-                      {alert.severity}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{alert.protocol}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant={alert.action === "drop" ? "destructive" : "secondary"}>
-                      {alert.action}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleClearAlert(alert.id)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+        <CardHeader>
+          <CardTitle>Alert Inventory</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            columns={columns}
+            data={filteredAlerts}
+            searchKey={["signature", "srcIP", "destIP", "timestamp"]}
+            filterOptions={filterOptions}
+            searchPlaceholder="Search alerts by signature, IP, or timestamp..."
+            pageSizeOptions={[5, 10, 20, 50]}
+          />
         </CardContent>
       </Card>
     </div>
