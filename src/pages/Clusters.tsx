@@ -194,6 +194,18 @@ const Clusters = () => {
     },
   ];
 
+  const getClusterRowTone = (status: ClusterStatus) => {
+    switch (status) {
+      case 'healthy':
+        return 'border-l-4 border-success/40 bg-success/5';
+      case 'degraded':
+        return 'border-l-4 border-warning/40 bg-warning/5';
+      case 'maintenance':
+      default:
+        return 'border-l-4 border-muted/40 bg-muted/10';
+    }
+  };
+
   const filteredClusters = clusters.filter(cluster => {
     if (statusFilter !== 'all' && cluster.status !== statusFilter) return false;
     if (searchQuery && !cluster.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -401,6 +413,9 @@ const Clusters = () => {
             pageSizeOptions={[5, 10, 20]}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
+            rowClassName={(row) =>
+              `transition-colors ${getClusterRowTone((row.original as Cluster).status)}`
+            }
           />
         </CardContent>
       </Card>

@@ -59,6 +59,18 @@ const Alerts = () => {
     });
   };
 
+  const getRowTone = (severity: Alert['severity']) => {
+    switch (severity) {
+      case 'high':
+        return 'border-l-4 border-destructive/50 bg-destructive/5';
+      case 'medium':
+        return 'border-l-4 border-warning/50 bg-warning/5';
+      case 'low':
+      default:
+        return 'border-l-4 border-muted/40 bg-muted/10';
+    }
+  };
+
   const columns: ColumnDef<Alert>[] = [
     {
       accessorKey: "timestamp",
@@ -301,6 +313,9 @@ const Alerts = () => {
             filterOptions={filterOptions}
             searchPlaceholder="Search alerts by signature, IP, or timestamp..."
             pageSizeOptions={[5, 10, 20, 50]}
+            rowClassName={(row) =>
+              `transition-colors ${getRowTone((row.original as Alert).severity)}`
+            }
           />
         </CardContent>
       </Card>

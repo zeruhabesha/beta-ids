@@ -15,6 +15,12 @@ type ActivityLog = {
   user: string;
 };
 
+type SeverityTone = {
+  row: string;
+  iconBg: string;
+  iconText: string;
+};
+
 const activityLogs: ActivityLog[] = [
   { id: 1, timestamp: "2025-11-04 14:23:45", type: "alert", severity: "high", message: "Malware detected and blocked from 192.168.1.45", user: "system" },
   { id: 2, timestamp: "2025-11-04 14:22:18", type: "info", severity: "info", message: "Rule 2100499 triggered for port scan detection", user: "system" },
@@ -87,6 +93,20 @@ const Activity = () => {
 
   const activityColumns: ColumnDef<ActivityLog>[] = [
     {
+      accessorKey: 'type',
+      header: 'Event',
+      cell: ({ row }) => {
+        const Icon = getIcon(row.original.type);
+        const tone = getSeverityTone(row.original.severity);
+        return (
+          <div className="flex items-center gap-3">
+            <div className={`rounded-full p-2 ${tone.iconBg}`}>
+              <Icon className={`h-4 w-4 ${tone.iconText}`} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold capitalize">{row.original.type}</span>
+              <span className="text-xs text-muted-foreground">{row.original.severity} event</span>
+            </div>
       accessorKey: 'timestamp',
       header: 'Timestamp',
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.timestamp}</span>,
@@ -106,6 +126,19 @@ const Activity = () => {
     },
     {
       accessorKey: 'message',
+      header: 'Details',
+      cell: ({ row }) => (
+        <div className="space-y-2">
+          <p className="text-sm font-medium leading-relaxed">{row.original.message}</p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {row.original.timestamp}
+            </span>
+            <span className="font-mono">@{row.original.user}</span>
+          </div>
+        </div>
+      ),
       header: 'Message',
       cell: ({ row }) => <span className="text-sm">{row.original.message}</span>,
     },
@@ -199,6 +232,10 @@ const Activity = () => {
             filterOptions={activityFilterOptions}
             searchPlaceholder="Search events by message, user, or timestamp..."
             pageSizeOptions={[5, 10, 20]}
+            rowClassName={(row) => {
+              const tone = getSeverityTone((row.original as ActivityLog).severity);
+              return `bg-card/40 transition-colors ${tone.row}`;
+            }}
           />
         </CardContent>
       </Card>

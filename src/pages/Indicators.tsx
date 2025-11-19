@@ -244,6 +244,20 @@ const Indicators = () => {
     },
   ];
 
+  const getIndicatorRowTone = (severity: IndicatorSeverity) => {
+    switch (severity) {
+      case 'critical':
+        return 'border-l-4 border-destructive/60 bg-destructive/5';
+      case 'high':
+        return 'border-l-4 border-warning/50 bg-warning/5';
+      case 'medium':
+        return 'border-l-4 border-info/40 bg-info/5';
+      case 'low':
+      default:
+        return 'border-l-4 border-muted/40 bg-muted/10';
+    }
+  };
+
   const filteredIndicators = indicators.filter(indicator => {
     if (typeFilter !== 'all' && indicator.type !== typeFilter) return false;
     if (statusFilter !== 'all' && indicator.status !== statusFilter) return false;
@@ -478,6 +492,9 @@ const Indicators = () => {
             pageSizeOptions={[5, 10, 20]}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
+            rowClassName={(row) =>
+              `transition-colors ${getIndicatorRowTone((row.original as Indicator).severity)}`
+            }
           />
         </CardContent>
       </Card>
