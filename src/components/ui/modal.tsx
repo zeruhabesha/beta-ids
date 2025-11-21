@@ -34,7 +34,7 @@ export function Modal({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex min-h-screen items-center justify-center px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity" onClick={onClose}>
-          <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+          <div className="absolute inset-0 bg-black/50 dark:bg-black/70"></div>
         </div>
 
         <span className="hidden sm:inline-block sm:h-screen sm:align-middle" aria-hidden="true">
@@ -43,7 +43,7 @@ export function Modal({
 
         <div
           className={cn(
-            "inline-block transform overflow-hidden rounded-lg bg-white text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:align-middle",
+            "inline-block transform overflow-hidden rounded-lg border border-border bg-background text-left align-bottom shadow-xl transition-all sm:my-8 sm:w-full sm:align-middle",
             sizeClasses[size],
             className
           )}
@@ -52,14 +52,14 @@ export function Modal({
           aria-labelledby="modal-headline"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div className="bg-background px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-medium leading-6 text-gray-900" id="modal-headline">
+              <h3 className="text-lg font-medium leading-6 text-foreground" id="modal-headline">
                 {title}
               </h3>
               <button
                 type="button"
-                className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none"
+                className="rounded-md text-muted-foreground hover:text-foreground focus:outline-none"
                 onClick={onClose}
               >
                 <span className="sr-only">Close</span>
@@ -69,7 +69,7 @@ export function Modal({
             <div className="mt-4">{children}</div>
           </div>
           {footer && (
-            <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+            <div className="bg-muted px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
               {footer}
             </div>
           )}

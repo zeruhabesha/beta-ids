@@ -93,6 +93,11 @@ const Activity = () => {
 
   const activityColumns: ColumnDef<ActivityLog>[] = [
     {
+      accessorKey: 'timestamp',
+      header: 'Timestamp',
+      cell: ({ row }) => <span className="font-mono text-xs">{row.original.timestamp}</span>,
+    },
+    {
       accessorKey: 'type',
       header: 'Event',
       cell: ({ row }) => {
@@ -107,38 +112,12 @@ const Activity = () => {
               <span className="text-sm font-semibold capitalize">{row.original.type}</span>
               <span className="text-xs text-muted-foreground">{row.original.severity} event</span>
             </div>
-      accessorKey: 'timestamp',
-      header: 'Timestamp',
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.timestamp}</span>,
-    },
-    {
-      accessorKey: 'type',
-      header: 'Type',
-      cell: ({ row }) => {
-        const Icon = getIcon(row.original.type);
-        return (
-          <div className="flex items-center gap-2 capitalize">
-            <Icon className="h-4 w-4" />
-            {row.original.type}
           </div>
         );
       },
     },
     {
       accessorKey: 'message',
-      header: 'Details',
-      cell: ({ row }) => (
-        <div className="space-y-2">
-          <p className="text-sm font-medium leading-relaxed">{row.original.message}</p>
-          <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              {row.original.timestamp}
-            </span>
-            <span className="font-mono">@{row.original.user}</span>
-          </div>
-        </div>
-      ),
       header: 'Message',
       cell: ({ row }) => <span className="text-sm">{row.original.message}</span>,
     },

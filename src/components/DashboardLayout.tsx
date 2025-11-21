@@ -3,6 +3,7 @@ import { AppSidebar } from "./AppSidebar";
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationBell } from "./NotificationBell";
 import { Separator } from "./ui/separator";
+import { Footer } from "./Footer";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -35,6 +36,7 @@ export const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               {children}
             </div>
           </main>
+          <Footer />
         </SidebarInset>
       </div>
     </SidebarProvider>
